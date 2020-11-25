@@ -1,0 +1,29 @@
+bohb:
+  min_budget: 50
+  max_budget: 500
+  n_iterations: 3
+  run_id: 'peg'
+  nameserver: '127.0.0.1'
+
+worker:
+  env:
+    show_gui: False
+    withForce: True
+    withJoint: False
+    relative: True
+    noise: False
+    sparse: False
+    dt: 0.005
+  train:
+    max_steps: 2000
+    exploration_episodes: 0
+    log: True
+    eval_every: 10
+    eval_episodes: 5
+    render: False
+    save_filename: "peg"
+    save_every: 10
+  validation:
+    max_steps: 2000
+    num_episodes: 10
+    render: False

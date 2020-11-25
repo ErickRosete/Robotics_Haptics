@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+
+<robot name="drawer" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- simplify the drawer as a box -->
+  <link name="drawer">
+    <inertial>
+      <mass value="5.0" />
+      <origin xyz="0 0 0.25" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <!-- visual origin is defined w.r.t. link local coordinate system -->
+      <origin xyz="0 0 0.25" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.3 0.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <!-- collision origin is defined w.r.t. link local coordinate system -->
+      <origin xyz="0 0 0.25" rpy="0 0 0 " />
+      <geometry>
+        <box size="0.3 0.3 0.5" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="drawer">
+    <material>Gazebo/Wood</material>
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+  <joint name="top_drawer_joint" type="prismatic" >
+    <axis xyz="-1 0 0" />
+    <parent link="drawer" />
+    <child link="top_drawer" />
+    <origin xyz="0 0 .375" rpy="0 0 0" />
+    <limit lower="0.0" upper="0.2" effort="100" velocity="100" />
+  </joint>
+  <link name="top_drawer">
+    <inertial>
+      <mass value="0.5" />
+      <origin xyz="0.2 0 0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.001 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.25 0.2" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.001 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.25 0.2" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="top_drawer">
+    <material>Gazebo/Green</material>
+    <turnGravityOff>false</turnGravityOff>
+    <dampingFactor>0.02</dampingFactor>
+  </gazebo>
+
+  <joint name="top_drawer_knob_joint" type="fixed" >
+    <parent link="top_drawer" />
+    <child link="top_drawer_knob" />
+    <origin xyz="-0.15 0 0" rpy="0 0 0" />
+  </joint>
+  <link name="top_drawer_knob">
+    <inertial>
+      <mass value="0.1" />
+      <origin xyz="0 0 0" />
+      <inertia  ixx="0.1" ixy="0.0"  ixz="0.0"  iyy="0.1"  iyz="0.0"  izz="0.1" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.02 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.02 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="top_drawer_knob">
+    <dampingFactor>0.01</dampingFactor>
+    <material>Gazebo/Red</material>
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+  <joint name="bottom_drawer_joint" type="prismatic" >
+    <axis xyz="-1 0 0" />
+    <parent link="drawer" />
+    <child link="bottom_drawer" />
+    <origin xyz="0 0 .125" rpy="0 0 0" />
+    <limit lower="0.0" upper="0.2" effort="100" velocity="100" />
+  </joint>
+  <link name="bottom_drawer">
+    <inertial>
+      <mass value="0.5" />
+      <origin xyz="0.2 0 0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.001 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.25 0.2" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.001 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.25 0.2" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="bottom_drawer">
+    <material>Gazebo/Wood</material>
+    <turnGravityOff>false</turnGravityOff>
+    <dampingFactor>0.02</dampingFactor>
+  </gazebo>
+
+  <joint name="bottom_drawer_knob_joint" type="fixed" >
+    <parent link="bottom_drawer" />
+    <child link="bottom_drawer_knob" />
+    <origin xyz="-0.15 0 0" rpy="0 0 0" />
+  </joint>
+  <link name="bottom_drawer_knob">
+    <inertial>
+      <mass value="0.1" />
+      <origin xyz="0 0 0" />
+      <inertia  ixx="0.1" ixy="0.0"  ixz="0.0"  iyy="0.1"  iyz="0.0"  izz="0.1" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.02 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.02 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="bottom_drawer_knob">
+    <dampingFactor>0.01</dampingFactor>
+    <material>Gazebo/Red</material>
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="top_drawer_knob_p3d_controller" filename="libgazebo_ros_p3d.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>100.0</updateRate>
+        <bodyName>top_drawer_knob</bodyName>
+        <frameName>drawer</frameName>
+        <topicName>top_drawer_knob_pose</topicName>
+        <!-- <interface:position name="top_drawer_knob_p3d_link_position"/> -->
+    </plugin>
+    <!--
+    <plugin name="sim_iface_drawer_controller" filename="libgazebo_ros_sim_iface.so">
+        <alwaysOn>true</alwaysOn>
+        <modelName>drawer</modelName>
+        <topicName>set_drawer_pose_topic</topicName>
+        <serviceName>set_drawer_pose_service</serviceName>
+        <frameName>/base_link</frameName>
+        <xyz>0 0 0</xyz>
+        <rpy>0 0 0</rpy>
+        <vel>0 0 0</vel>
+        <angVel>0 0 0</angVel>
+        <interface:position name="sim_iface_drawer_position"/>
+    </plugin>
+   -->
+
+  </gazebo>
+
+</robot>

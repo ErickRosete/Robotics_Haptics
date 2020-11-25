@@ -1,0 +1,28 @@
+<robot name="cylinder">
+  <material name="Cyan">
+    <color rgba="0 1.0 1.0 1.0"/>
+  </material>
+  
+ <link name="cylinder">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.15"/>
+      <inertia ixx=" 0"  ixy="0"  ixz="0" iyy=" 0" iyz="0" izz="0" />
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+       <cylinder radius="0.025" length="0.075"/>
+      </geometry>
+      <material name="Cyan" />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+       <cylinder radius="0.025" length="0.075"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
