@@ -5,9 +5,13 @@ from peg.panda_peg_env import  PandaPegEnv
 from utils.force_plot import ForcePlot
 import numpy as np
 
-plot = ForcePlot()
+show_force = False
+show_gui = True
 
-env = PandaPegEnv()
+if show_force:
+    plot = ForcePlot()
+
+env = PandaPegEnv(show_gui)
 error = 0.0015
 dt = 1./240. # the default timestep in pybullet is 240 Hz  
 target = []
@@ -16,12 +20,11 @@ target_position = [0.7, 0, 0.1]
 for i_episode in range(20):
     observation = env.reset()
     state = 0
-    k_p, k_d = 10, 0.1
+    k_p, k_d = 5, 0.05
     for t in range(2000):
         if state == 0:
             target = [target_position[0] - 0.125, target_position[1], target_position[2] + 0.07]
         elif state == 1:
-            k_d = 0.05
             target = [target_position[0], target_position[1], target_position[2] + 0.063]
         elif state == 2:
             target = [target_position[0], target_position[1], target_position[2] + 0.0175]
@@ -37,11 +40,12 @@ for i_episode in range(20):
         target_position = info['target_position']
         
         #Force measurements
-        if t % 20 == 0:
+        if show_force and t % 20 == 0:
             plot.update(observation[5:])
+
         if abs(dx) < error and abs(dy) < error and abs(dz) < error:
             state += 1
-
+        
         if done:
             print("Episode finished after {} timesteps".format(t+1))
             break

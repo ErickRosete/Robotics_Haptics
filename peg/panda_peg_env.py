@@ -14,7 +14,7 @@ import logging
 class PandaPegEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, show_gui=False, dt=0.005):
+    def __init__(self, show_gui=False, dt=0.005, action_frequency=30, simulation_frequency=240):
         if show_gui:
             p.connect(p.GUI)
         else:
@@ -34,10 +34,13 @@ class PandaPegEnv(gym.Env):
         self.action_space = spaces.Box(np.array([-1]*4), np.array([1]*4))
         self.observation_space = spaces.Box(np.array([-1]*7), np.array([1]*7)) # x, y, z, joint_f1, joint_f2, force_f1, force_f2 
         
+        # Set different frequencies
+        self.action_frequency = action_frequency
+        self.simulation_frequency = simulation_frequency
+        p.setTimeStep(1/simulation_frequency)
 
-    def step(self, action, dt=0.005):
+    def step(self, action):
         """action: Velocities in xyz and fingers [vx, vy, vz, vf]"""
-        # self.dt = dt
         p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)
         orientation = p.getQuaternionFromEuler([0., -math.pi, math.pi/2.]) # End effector desired orientation
 
@@ -61,7 +64,11 @@ class PandaPegEnv(gym.Env):
                                     list(range(7))+[9,10], #7 DoF + 2 fingers
                                     p.POSITION_CONTROL, 
                                     list(jointPoses[:7])+2*[fingerAngle]) # Desired position
-        p.stepSimulation()
+
+        # Perform more steps in simulation than querying the model 
+        # (Gives time to reach the joint position)
+        for i in range(self.simulation_frequency//self.action_frequency):
+            p.stepSimulation()
 
         state_target = p.getLinkState(self.boardUid, self.target)[0]
             # p.addUserDebugText(str(i), state_object)
@@ -85,19 +92,18 @@ class PandaPegEnv(gym.Env):
         return observation, reward, done, info
 
     def getReward(self):
-        
         peg_pose = np.asarray(p.getBasePositionAndOrientation(self.pegUid)[0])
         target_pose = np.asarray(p.getLinkState(self.boardUid, self.target)[0])
 
-        offset = 0.1 # 20 cm on top
-        target_pose[2] += offset
+        # offset = 0.1 # 20 cm on top
+        # target_pose[2] += offset
         
-        # Delete offset
-        tolerance = 0.05
-        if (target_pose[0] - tolerance < peg_pose[0] < target_pose[0] + tolerance and # coord 'x' and 'y' of object
-            target_pose[1] - tolerance < peg_pose[1] < target_pose[1] + tolerance and 
-            target_pose[2] - tolerance < peg_pose[2] < target_pose[2] + tolerance): # Coord 'z' of object
-            target_pose[2] -= offset
+        # # Delete offset
+        # tolerance = 0.05
+        # if (target_pose[0] - tolerance < peg_pose[0] < target_pose[0] + tolerance and # coord 'x' and 'y' of object
+        #     target_pose[1] - tolerance < peg_pose[1] < target_pose[1] + tolerance and 
+        #     target_pose[2] - tolerance < peg_pose[2] < target_pose[2] + tolerance): # Coord 'z' of object
+        #     target_pose[2] -= offset
 
         dist = np.linalg.norm(target_pose - peg_pose)
         reward = -dist  # Minimize dist
@@ -106,12 +112,11 @@ class PandaPegEnv(gym.Env):
     def getTermination(self):
         done, success = False, False
         peg_pose = np.asarray(p.getBasePositionAndOrientation(self.pegUid)[0])
-        board_pose = np.asarray(p.getBasePositionAndOrientation(self.boardUid)[0])
+        target_pose = np.asarray(p.getLinkState(self.boardUid, self.target)[0])
         state_robot = np.asarray(p.getLinkState(self.pandaUid, 11, computeForwardKinematics=1)[0]) # End effector pose xyz
-
-        if (board_pose[0] - 0.05 < peg_pose[0] < board_pose[0] + 0.05 and # coord 'x' and 'y' of object
-            board_pose[1] - 0.05 < peg_pose[1] < board_pose[1] + 0.05 and 
-            peg_pose[2] <= 0.20): # Coord 'z' of object
+        if (target_pose[0] - 0.05 < peg_pose[0] < target_pose[0] + 0.05 and # coord 'x' and 'y' of object
+            target_pose[1] - 0.05 < peg_pose[1] < target_pose[1] + 0.05 and 
+            peg_pose[2] <= 0.21): # Coord 'z' of object
             # Inside box
             done, success = True, True
         elif np.linalg.norm(state_robot - peg_pose) > 0.075:

@@ -15,7 +15,7 @@ worker:
     sparse: False
     dt: 0.005
   train:
-    max_steps: 2000
+    max_steps: 1000
     exploration_episodes: 0
     log: True
     eval_every: 10
@@ -24,6 +24,6 @@ worker:
     save_filename: "peg"
     save_every: 10
   validation:
-    max_steps: 2000
+    max_steps: 1000
     num_episodes: 10
     render: False
