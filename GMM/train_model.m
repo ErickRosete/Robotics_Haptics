@@ -8,7 +8,7 @@ function bll = train_model(name, type, K, num_models)
     num_demo = 0;
     for f = 1:50;
         num_demo = num_demo+1;
-        data = dlmread(['demonstrations/drawer_v2/drawer_v2_' num2str(f) '.txt']);
+        data = dlmread(['demonstrations/peg_v2/peg_v2_' num2str(f) '.txt']);
         
         if type == "force"
             x = data(:, 2:size(data, 2));
