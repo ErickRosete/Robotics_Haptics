@@ -71,7 +71,6 @@ class PandaPegEnv(gym.Env):
             p.stepSimulation()
 
         state_target = p.getLinkState(self.boardUid, self.target)[0]
-            # p.addUserDebugText(str(i), state_object)
 
         #Observation
         state_robot = p.getLinkState(self.pandaUid, 11, computeForwardKinematics=1)[0] # End effector pose xyz
@@ -82,32 +81,49 @@ class PandaPegEnv(gym.Env):
         done, success  = self.getTermination()
         if done:
             if success:
-                reward = 1000       # High positive reward to incentivize learning with success
+                reward = 500       # High positive reward to incentivize learning with success
             else:
-                reward = -1000      # High negative reward to avoid learning termination without success
+                reward = -500      # High negative reward to avoid learning termination without success
         else:
-            reward = self.getReward()   # Continuous reward    
+            reward = self.getReward(action)   # Continuous reward    
 
         info = {"target_position": state_target, "success": success} 
         return observation, reward, done, info
 
-    def getReward(self):
+    def getReward(self, action):
+        #Parameters
+        near_reward, change_reward, collision_reward, action_reward = 0, 0, 0, 0
+        scale_near_reward = 3
+
         peg_pose = np.asarray(p.getBasePositionAndOrientation(self.pegUid)[0])
         target_pose = np.asarray(p.getLinkState(self.boardUid, self.target)[0])
-
-        # offset = 0.1 # 20 cm on top
-        # target_pose[2] += offset
         
-        # # Delete offset
-        # tolerance = 0.05
-        # if (target_pose[0] - tolerance < peg_pose[0] < target_pose[0] + tolerance and # coord 'x' and 'y' of object
-        #     target_pose[1] - tolerance < peg_pose[1] < target_pose[1] + tolerance and 
-        #     target_pose[2] - tolerance < peg_pose[2] < target_pose[2] + tolerance): # Coord 'z' of object
-        #     target_pose[2] -= offset
+        if self.stage == 0:
+            target_pose[2] += 0.05 # Initial objective is to put the peg 5 cm on top of original target
+            tolerance = 0.02    
+            if (target_pose[0] - tolerance < peg_pose[0] < target_pose[0] + tolerance and
+                target_pose[1] - tolerance < peg_pose[1] < target_pose[1] + tolerance and 
+                peg_pose[2] < target_pose[2] + tolerance): 
+                self.stage = 1  # If peg is near the target we change the target to peg insertion        
+                change_reward = 500 # Incentivize reaching intermediate target
+        elif self.stage == 1:
+            scale_near_reward = 6
 
-        dist = np.linalg.norm(target_pose - peg_pose)
-        reward = -dist  # Minimize dist
-        return reward
+        #Minimize distance between peg and target
+        near_reward = - scale_near_reward * np.linalg.norm(target_pose - peg_pose)
+
+        #Maximize distance between peg and board wall   
+        board_pose = np.asarray(p.getBasePositionAndOrientation(self.boardUid)[0])
+        if (board_pose[0] -0.15 < peg_pose[0] < board_pose[0] - 0.10 and 
+           peg_pose[2] < 0.20):
+            collision_reward = -1
+
+        #Penalize very high velocities (Smooth transitions)
+        action_reward = -0.1 * np.linalg.norm(action[:3])
+
+        total_reward = near_reward + collision_reward + change_reward + action_reward
+        # print("Total reward", total_reward)
+        return total_reward
 
     def getTermination(self):
         done, success = False, False
@@ -182,6 +198,9 @@ class PandaPegEnv(gym.Env):
         p.setGravity(0,0,-10)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
+        # Reset logic parameters
+        self.stage = 0
+        self.first_step = True
 
         # Loading objects in environment
         planeUid = p.loadURDF("plane.urdf", basePosition=[0,0,-0.65])
@@ -230,7 +249,7 @@ class PandaPegEnv(gym.Env):
         p.addUserDebugText("G1", (0,0.5,0.5), textSize=0.75)
         target_pose = np.asarray(p.getLinkState(self.boardUid, self.target)[0])
         p.addUserDebugText("G2", target_pose, textSize=0.75)
-        target_pose[2] += 0.1
+        target_pose[2] += 0.05
         p.addUserDebugText("G3", target_pose, textSize=0.75)
 
         return observation
@@ -263,54 +282,59 @@ class PandaPegEnv(gym.Env):
 
 # Custom wrappers
 class TransformObservation(ObservationWrapper):
-    def __init__(self, env=None, withForce = True, withJoint=False, relative = True, noise=False):
+    def __init__(self, env=None, with_force = True, with_joint=False, relative = True, with_noise=False):
         super(TransformObservation, self).__init__(env)
 
-        self.withForce = withForce
-        self.withJoint = withJoint
+        self.with_force = with_force
+        self.with_joint = with_joint
+        self.with_noise = with_noise
         self.relative = relative
-        self.noise = noise
+        self.target_noise = 0
 
-        if withForce:
-            if withJoint:
+        if with_force:
+            if with_joint:
                 self.observation_space = spaces.Box(np.array([-1]*7), np.array([1]*7)) # x, y, z, j1, j2, force_f1, force_f2 
             else:
                 self.observation_space = spaces.Box(np.array([-1]*5), np.array([1]*5)) # x, y, z, force_f1, force_f2 
         else: # mode = "pose"
-            if withJoint:
+            if with_force:
                 self.observation_space = spaces.Box(np.array([-1]*5), np.array([1]*5)) # x, y, z, j1, j2 
             else:
                 self.observation_space = spaces.Box(np.array([-1]*3), np.array([1]*3)) # x, y, z 
 
     def observation(self, obs):
+        if self.env.first_step:
+            self.target_noise = np.random.normal(0, 0.01)
+            self.env.first_step = False
+
         if self.relative:
             state_target = np.asarray(p.getLinkState(self.env.boardUid, self.env.target)[0])
             state_target[2] += 0.0175 # Target is a little bit on top
-            if self.noise:
-                state_target +=  np.random.normal(0, 0.01)
+            if self.with_noise:
+                state_target +=  self.target_noise
             obs[:3] = obs[:3] - state_target  # Relative pose to target
             obs[3:] = obs[3:] - np.array([0.024, 0.024, 0.6, 0.6]) # Relative Joints and Force to target
 
-        if not self.withJoint:
+        if not self.with_joint:
             obs = obs[[0,1,2,5,6]]
-        if not self.withForce:
+        if not self.with_force:
             obs = obs[:-2]
 
         return obs
 
 class TransformAction(ActionWrapper):
-    def __init__(self, env=None, withJoint=False):
+    def __init__(self, env=None, with_joint=False):
         super(TransformAction, self).__init__(env)
-        self.withJoint = withJoint
+        self.with_joint = with_joint
 
-        if withJoint:
+        if with_joint:
             self.action_space = spaces.Box(np.array([-1]*4), np.array([1]*4)) # vel_x, vel_y, vel_z, vel_joint
         else:
             self.action_space = spaces.Box(np.array([-1]*3), np.array([1]*3)) # vel_x, vel_y, vel_z
 
 
     def action(self, action):
-        if self.withJoint:
+        if self.with_joint:
             return action
         else:
             action = np.append(action, -0.002/self.env.dt) 
@@ -337,10 +361,10 @@ class TransformReward(RewardWrapper):
 
 
 # Create environment with custom wrapper
-def pandaPegV2(show_gui=False, dt=0.005, withForce=True, withJoint=False, relative = True, noise=False, sparse=False):
+def pandaPegV2(show_gui=False, dt=0.005, with_force=True, with_joint=False, relative = True, with_noise=False, sparse=False):
     env = PandaPegEnv(show_gui, dt)
-    env = TransformObservation(env, withForce, withJoint, relative, noise)
-    env = TransformAction(env, withJoint)
+    env = TransformObservation(env, with_force, with_joint, relative, with_noise)
+    env = TransformAction(env, with_joint)
     env = TransformReward(env, sparse)
     return env
 
