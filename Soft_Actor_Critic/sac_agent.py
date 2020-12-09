@@ -114,7 +114,7 @@ class SAC_Agent:
         return critic_loss, actor_loss.item(), alpha_loss.item()
 
     def evaluate(self, num_episodes = 5, max_steps = 2000, render=False):
-        episodes_returns, episodes_lengths = [], []
+        succesful_episodes, episodes_returns, episodes_lengths = 0, [], []
         for episode in range(1, num_episodes + 1):
             state = self.env.reset()
             episode_return = 0
@@ -127,17 +127,22 @@ class SAC_Agent:
                     self.env.render()
                 if done:
                     break
+            if ("success" in info) and info['success']:
+                succesful_episodes += 1
             episodes_returns.append(episode_return) 
             episodes_lengths.append(step)
-        return np.mean(episodes_returns), np.mean(episodes_lengths)
+        accuracy = succesful_episodes/num_episodes
+        return accuracy, np.mean(episodes_returns), np.mean(episodes_lengths)
 
     def train(self, num_episodes, max_steps, exploration_episodes=0,
-        log=True, eval_every=10, eval_episodes=5, render=False,
+        log=True, eval_every=10, eval_episodes=5, render=False, early_stopping=False,
         save_dir="models/SAC_models", save_filename="sac_model", save_every=10): 
 
+        episodes_returns, episodes_lengths = [], []
         for episode in range(1, num_episodes + 1):
             state = self.env.reset()
             episode_return = 0
+            ep_critic_loss, ep_actor_loss, ep_alpha_loss = 0, 0, 0
             for step in range(max_steps):
                 if episode < exploration_episodes:
                     action = self.env.action_space.sample()
@@ -146,10 +151,9 @@ class SAC_Agent:
                 next_state, reward, done, info = self.env.step(action)
 
                 critic_loss, actor_loss, alpha_loss = self.update(state, action, next_state, reward, done)
-                if log:
-                    self.writer.add_scalar('Train/critic_loss', critic_loss, episode)
-                    self.writer.add_scalar('Train/actor_loss', actor_loss, episode)
-                    self.writer.add_scalar('Train/alpha_loss', alpha_loss, episode)
+                ep_critic_loss += critic_loss
+                ep_actor_loss += actor_loss
+                ep_alpha_loss += alpha_loss
 
                 state = next_state
                 episode_return += reward
@@ -160,18 +164,30 @@ class SAC_Agent:
                     break
 
             # End of episode
+            episodes_returns.append(episode_return)
+            episodes_lengths.append(step)
             self.logger.info("Episode: %d   Return: %2f   Episode length: %d" % (episode, episode_return, step))
             if log:
                 self.writer.add_scalar('Train/return', episode_return, episode)
                 self.writer.add_scalar('Train/episode_length', step, episode)
-            
+                self.writer.add_scalar('Train/critic_loss', ep_critic_loss/step, episode)
+                self.writer.add_scalar('Train/actor_loss', ep_actor_loss/step, episode)
+                self.writer.add_scalar('Train/alpha_loss', ep_alpha_loss/step, episode)     
+
             # Validation
             if episode % eval_every == 0 or episode == num_episodes:
-                eval_return, eval_length = self.evaluate(eval_episodes, max_steps)
+                accuracy, eval_return, eval_length = self.evaluate(eval_episodes, max_steps)
                 self.logger.info("Validation - Return: %2f   Episode length: %d" % (eval_return, eval_length))
                 if log:
                     self.writer.add_scalar('Val/return', eval_return, episode)
                     self.writer.add_scalar('Val/episode_length', eval_length, episode)
+                if accuracy == 1 and early_stopping:
+                    if not os.path.exists(save_dir):
+                        os.makedirs(save_dir)           
+                    filename = "%s/%s_%d.pth"%(save_dir, save_filename, episode)
+                    self.save(filename)
+                    self.logger.info("Early stopped as accuracy in validation is 1.0")
+                    break
 
             # Save model
             if episode % save_every == 0 or episode == num_episodes:
@@ -179,6 +195,8 @@ class SAC_Agent:
                     os.makedirs(save_dir)           
                 filename = "%s/%s_%d.pth"%(save_dir, save_filename, episode)
                 self.save(filename)
+
+        return episode, episodes_returns, episodes_lengths
 
     def soft_update(self, target, source, tau):
         for target_param, param in zip(target.parameters(), source.parameters()):

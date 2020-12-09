@@ -32,12 +32,13 @@ class SAC_Worker(Worker):
         save_dir = "models/iteration_%d" % self.iteration
         self.logger.info("Save directory: %s" % save_dir)
         agent.train(**self.cfg.train, num_episodes = int(budget), save_dir=save_dir)
-        val_return, val_length = agent.evaluate(**self.cfg.validation)
+        accuracy, val_return, val_length = agent.evaluate(**self.cfg.validation)
         self.logger.info("Final return reported to the optimizer: %2f" % val_return)
 
         self.iteration += 1
         return ({'loss': - val_return, # remember: HpBandSter always minimizes!
-                 'info': { 'val_episode_length': val_length }})
+                 'info': { 'val_episode_length': val_length,
+                           'accuracy': accuracy } })
     
     @staticmethod
     def get_configspace():
@@ -77,7 +78,7 @@ def optimize(cfg):
     logger.info('Best found configuration:', id2config[incumbent]['config'])
     logger.info('A total of %i unique configurations where sampled.' % len(id2config.keys()))
     logger.info('A total of %i runs where executed.' % len(res.get_all_runs()))
-    logger.info('Total budget corresponds to %.1f full function evaluations.'%(sum([r.budget for r in res.get_all_runs()])/args.max_budget))
+    logger.info('Total budget corresponds to %.1f full function evaluations.'%(sum([r.budget for r in res.get_all_runs()])/cfg.bohb.max_budget))
 
 
 @hydra.main(config_path="../config", config_name="hpo_config")

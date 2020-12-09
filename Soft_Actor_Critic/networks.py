@@ -20,8 +20,8 @@ class PolicyNetwork(nn.Module):
     def __init__(self, state_dim, action_dim, action_high=1, action_low=-1, hidden_dim=256):
         super(PolicyNetwork, self).__init__()
         # Scale parameters
-        self.action_high = torch.from_numpy(action_high).cuda()
-        self.action_low = torch.from_numpy(action_low).cuda()
+        self.action_high = torch.tensor(action_high, dtype=torch.float, device="cuda") 
+        self.action_low = torch.tensor(action_low, dtype=torch.float, device="cuda")
         
         # Network
         self.fc1 = nn.Linear(state_dim, hidden_dim)
