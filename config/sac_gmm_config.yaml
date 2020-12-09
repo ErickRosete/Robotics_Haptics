@@ -1,0 +1,47 @@
+gmm_name: "models/GMM/gmm_peg_v2_pose_3.mat"
+
+train:
+  env:
+    show_gui: False
+    with_force: True
+    with_joint: False
+    relative: True
+    with_noise: True
+    sparse: False
+    dt: 0.05
+  run:
+    num_episodes: 1000
+    max_steps: 500
+    log: True
+    eval_every: 10
+    eval_episodes: 10
+    render: False
+    save_dir: "models/"
+    save_filename: "peg"
+    save_every: 10
+    early_stopping: True
+
+test:
+  env:
+    show_gui: True
+    with_force: False
+    with_joint: False
+    relative: True
+    with_noise: False
+    sparse: False
+    dt: 0.05
+  run:
+    max_steps: 500
+    num_episodes: 5
+    render: False
+
+sac_agent:
+  batch_size: 256
+  gamma: 0.99 
+  tau: 0.005 
+  actor_lr: 3e-4 
+  critic_lr: 3e-4 
+  alpha_lr: 3e-4
+  hidden_dim: 256
+  window_size: 32
+

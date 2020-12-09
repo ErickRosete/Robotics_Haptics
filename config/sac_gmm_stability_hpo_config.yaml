@@ -1,0 +1,27 @@
+bohb:
+  min_budget: 1
+  max_budget: 9
+  n_iterations: 4
+  run_id: 'peg'
+  nameserver: '127.0.0.1'
+
+worker:
+  gmm_name: "models/GMM_models/gmm_peg_v2_pose_9.npy"
+  env:
+    show_gui: False
+    with_force: False
+    with_joint: False
+    relative: True
+    with_noise: False
+    sparse: False
+    dt: 0.05
+  train:
+    num_episodes: 500
+    max_steps: 500
+    log: True
+    eval_every: 10
+    eval_episodes: 20
+    render: False
+    save_filename: "peg"
+    save_every: 10
+    early_stopping: True
