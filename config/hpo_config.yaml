@@ -1,6 +1,6 @@
 bohb:
-  min_budget: 50
-  max_budget: 500
+  min_budget: 200
+  max_budget: 600
   n_iterations: 3
   run_id: 'peg'
   nameserver: '127.0.0.1'
@@ -8,10 +8,10 @@ bohb:
 worker:
   env:
     show_gui: False
-    withForce: True
-    withJoint: False
+    with_force: False
+    with_joint: False
     relative: True
-    noise: False
+    with_noise: False
     sparse: False
     dt: 0.005
   train:
