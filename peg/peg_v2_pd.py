@@ -21,6 +21,7 @@ for i_episode in range(20):
     observation = env.reset()
     state = 0
     k_p, k_d = 5, 0.05
+    episode_return = 0
     for t in range(2000):
         if state == 0:
             target = [target_position[0] - 0.125, target_position[1], target_position[2] + 0.07]
@@ -38,7 +39,7 @@ for i_episode in range(20):
         action = np.array([pd_x,pd_y,pd_z, -0.4])
         observation, reward, done, info = env.step(action)
         target_position = info['target_position']
-        
+        episode_return += reward
         #Force measurements
         if show_force and t % 20 == 0:
             plot.update(observation[5:])
@@ -49,4 +50,5 @@ for i_episode in range(20):
         if done:
             print("Episode finished after {} timesteps".format(t+1))
             break
+    print("Episode return", episode_return)
 env.close()
