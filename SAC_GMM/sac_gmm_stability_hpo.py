@@ -13,7 +13,7 @@ import hpbandster.core.nameserver as hpns
 import ConfigSpace.hyperparameters as CSH
 from hpbandster.optimizers import BOHB as BOHB
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from peg.panda_peg_env import pandaPegV2
+from peg.panda_peg_env import panda_peg_v2
 from GMM.gmm import GMM
 from utils.utils import get_cwd
 
@@ -28,7 +28,7 @@ class SAC_Worker(Worker):
         self.logger = logging.getLogger(__name__)
     
     def compute(self, config, budget, working_directory, *args, **kwargs):
-        env = pandaPegV2(**self.cfg.env)
+        env = panda_peg_v2(**self.cfg.env)
         model_name =  str((get_cwd() / self.cfg.gmm_name).resolve())
         gmm_model = GMM(model_name)
 

@@ -1,6 +1,8 @@
+import os
 import sys
 import json 
 import hydra
+import pickle
 import logging
 import numpy as np
 from pathlib import Path
@@ -12,7 +14,7 @@ import hpbandster.core.nameserver as hpns
 import ConfigSpace.hyperparameters as CSH
 from hpbandster.optimizers import BOHB as BOHB
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from peg.panda_peg_env import pandaPegV2
+from peg.panda_peg_env import panda_peg_v2
 from GMM.gmm import GMM
 from utils.utils import get_cwd
 
@@ -25,7 +27,7 @@ class SAC_Worker(Worker):
         self.logger = logging.getLogger(__name__)
     
     def compute(self, config, budget, working_directory, *args, **kwargs):
-        env = pandaPegV2(**self.cfg.env)
+        env = panda_peg_v2(**self.cfg.env)
         model_name =  str((get_cwd() / self.cfg.gmm_name).resolve())
         gmm_model = GMM(model_name)
         agent = SAC_GMM_Agent(env,gmm_model, **config)
@@ -78,11 +80,17 @@ def optimize(cfg):
     id2config = res.get_id2config_mapping()
     incumbent = res.get_incumbent_id()
 
+    # Store optimization results
+    if not os.path.exists("optimization_results/"): 
+        os.makedirs("optimization_results/")
+    with open(os.path.join("optimization_results/", "%s.pkl" % cfg.bohb.run_id), 'wb') as fh:
+        pickle.dump(res, fh)
+
     logger.info('Best found configuration:', id2config[incumbent]['config'])
     logger.info('A total of %i unique configurations where sampled.' % len(id2config.keys()))
     logger.info('A total of %i runs where executed.' % len(res.get_all_runs()))
     logger.info('Total budget corresponds to %.1f full function evaluations.'%(sum([r.budget for r in res.get_all_runs()])/cfg.bohb.max_budget))
-
+    
 
 @hydra.main(config_path="../config", config_name="sac_gmm_hpo_config")
 def main(cfg):
