@@ -113,12 +113,12 @@ class SAC_Agent:
         
         return critic_loss, actor_loss.item(), alpha_loss.item()
 
-    def evaluate(self, num_episodes = 5, max_steps = 2000, render=False):
+    def evaluate(self, num_episodes = 5, render=False):
         succesful_episodes, episodes_returns, episodes_lengths = 0, [], []
         for episode in range(1, num_episodes + 1):
             state = self.env.reset()
             episode_return = 0
-            for step in range(max_steps):
+            for step in range(self.env.max_episode_steps):
                 action = self.getAction(state, deterministic = True) 
                 next_state, reward, done, info = self.env.step(action)
                 state = next_state
@@ -134,7 +134,7 @@ class SAC_Agent:
         accuracy = succesful_episodes/num_episodes
         return accuracy, np.mean(episodes_returns), np.mean(episodes_lengths)
 
-    def train(self, num_episodes, max_steps, exploration_episodes=0,
+    def train(self, num_episodes, exploration_episodes=0,
         log=True, eval_every=10, eval_episodes=5, render=False, early_stopping=False,
         save_dir="models/SAC_models", save_filename="sac_model", save_every=10): 
 
@@ -143,7 +143,7 @@ class SAC_Agent:
             state = self.env.reset()
             episode_return = 0
             ep_critic_loss, ep_actor_loss, ep_alpha_loss = 0, 0, 0
-            for step in range(max_steps):
+            for step in range(self.env.max_episode_steps):
                 if episode < exploration_episodes:
                     action = self.env.action_space.sample()
                 else:
@@ -176,7 +176,7 @@ class SAC_Agent:
 
             # Validation
             if episode % eval_every == 0 or episode == num_episodes:
-                accuracy, eval_return, eval_length = self.evaluate(eval_episodes, max_steps)
+                accuracy, eval_return, eval_length = self.evaluate(eval_episodes)
                 self.logger.info("Validation - Return: %2f   Episode length: %d" % (eval_return, eval_length))
                 if log:
                     self.writer.add_scalar('Val/return', eval_return, episode)
