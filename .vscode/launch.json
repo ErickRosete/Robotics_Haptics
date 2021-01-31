@@ -4,11 +4,46 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+
+
         {
-            "name": "Python: Working directory",
+            "name": "Record Peg demonstrations",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "peg/peg_v2_record.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Train GMM model",
+            "type": "python",
+            "request": "launch",
+            "program": "gmm/train_gmm_model.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Evaluate GMM model",
+            "type": "python",
+            "request": "launch",
+            "program": "peg/peg_v2_gmm.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Evaluate SAC-GMM model",
+            "type": "python",
+            "request": "launch",
+            "program": "SAC_GMM/sac_gmm_test.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "SAC GMM",
+            "type": "python",
+            "request": "launch",
+            "program": "SAC_GMM/sac_gmm_test.py",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         },
@@ -17,7 +52,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         }
     ]
