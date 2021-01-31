@@ -156,5 +156,15 @@ def test():
     vel = model.predict_velocity(state)
     print(vel)
 
+def matlab_to_python(model_names):
+    for model_name in model_names:
+        model = GMM(model_name)
+        model_name = os.path.splitext(model_name)[0] + '.npy'
+        model.save_model(model_name)
+
+def delete_files(files):
+    for file in files:
+        os.remove(file)
+
 if __name__ == "__main__":
     test()
