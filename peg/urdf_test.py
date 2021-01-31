@@ -49,7 +49,7 @@ p.setCollisionFilterGroupMask(pegUid, -1, collisionFilterGroup, -1)
 # state_robot = p.getLinkState(self.pandaUid, 11, computeForwardKinematics=1)[0]
 # print(state_robot)
 # state_fingers = (p.getJointState(self.pandaUid,9)[0], p.getJointState(self.pandaUid, 10)[0])
-# force = (self.getForce(9), self.getForce(10)) 
+# force = (self.get_force(9), self.get_force(10)) 
 # observation = np.asarray(state_robot + state_fingers + force)
 
 p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1) # rendering's back on again
