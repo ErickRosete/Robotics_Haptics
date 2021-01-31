@@ -6,6 +6,7 @@ import logging
 import pickle
 import numpy as np
 from pathlib import Path
+from datetime import datetime
 import ConfigSpace as CS
 import hpbandster.core.result as hpres
 from hpbandster.core.worker import Worker
@@ -13,7 +14,7 @@ import hpbandster.core.nameserver as hpns
 import ConfigSpace.hyperparameters as CSH
 from hpbandster.optimizers import BOHB as BOHB
 sys.path.insert(0, str(Path(__file__).parents[1]))
-from peg.panda_peg_env import pandaPegV2
+from peg.panda_peg_env import panda_peg_v2
 from GMM.gmm import GMM
 from utils.utils import get_cwd
 
@@ -30,7 +31,7 @@ class GMM_Worker(Worker):
     def __init__(self, cfg, run_id, nameserver):
         super(GMM_Worker,self).__init__(run_id, nameserver = nameserver)
         self.cfg = cfg
-        self.env = pandaPegV2(**cfg.env)
+        self.env = panda_peg_v2(**cfg.env)
         model_name =  str((get_cwd() / cfg.gmm_name).resolve())
         self.initial_model = GMM(model_name)
         self.total_episodes = 0
@@ -93,7 +94,7 @@ def optimize(cfg):
     # Store optimization results
     if not os.path.exists("optimization_results/"): 
         os.makedirs("optimization_results/")
-    with open(os.path.join("optimization_results/", "%s.pkl"%cfg.bohb.run_id), 'wb') as fh:
+    with open(os.path.join("optimization_results/", "%s.pkl" % cfg.bohb.run_id), 'wb') as fh:
         pickle.dump(res, fh)
 
     # Save model
@@ -108,11 +109,20 @@ def optimize(cfg):
 
     # Shutdown
     bohb.shutdown(shutdown_workers=True)
-    #NS.shutdown()
+    NS.shutdown()
+
+@hydra.main(config_path="../config", config_name="bohb_mult_gmm_config")
+def mult_gmm(cfg):
+    run_id = cfg.bohb.run_id
+    for i in range(len(cfg.gmm_names)):
+        cfg.worker.gmm_name = cfg.gmm_names[i] 
+        cfg.optimized_gmm_name = cfg.optimized_gmm_names[i]
+        cfg.bohb.run_id = run_id + "_" + datetime.now().strftime("%d-%m_%H:%M")
+        optimize(cfg)
 
 @hydra.main(config_path="../config", config_name="bohb_gmm_config")
-def main(cfg):
+def single_gmm(cfg):
     optimize(cfg)
 
 if __name__ == "__main__":
-    main()
+    mult_gmm()

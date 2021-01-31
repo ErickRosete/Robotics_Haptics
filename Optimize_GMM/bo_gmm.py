@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from GMM.gmm import GMM
-from peg.panda_peg_env import  pandaPegV2
+from peg.panda_peg_env import  panda_peg_v2
 
 class GMMOptimizer:
     def __init__(self, env, model):
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Environment hyperparameters
     env_params = {"show_gui": False, "with_force": False, "with_joint": False,
                     "relative": True, "with_noise": False, "dt": 0.05}
-    env = pandaPegV2(**env_params)
+    env = panda_peg_v2(**env_params)
 
     # Evaluation parameters
     model_name = "models/GMM_models/gmm_peg_v2_pose_9.npy"

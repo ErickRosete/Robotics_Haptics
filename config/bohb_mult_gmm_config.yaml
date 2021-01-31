@@ -1,0 +1,45 @@
+optimized_gmm_names: [
+                      "models/optimizer/optimized_gmm_peg_v2_pose_5.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_6.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_7.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_8.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_9.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_10.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_11.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_12.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_13.npy",
+                      "models/optimizer/optimized_gmm_peg_v2_pose_14.npy"]
+
+gmm_names: ["models/GMM/gmm_peg_v2_pose_5.mat",
+            "models/GMM/gmm_peg_v2_pose_6.mat",
+            "models/GMM/gmm_peg_v2_pose_7.mat",
+            "models/GMM/gmm_peg_v2_pose_8.mat",
+            "models/GMM/gmm_peg_v2_pose_9.mat",
+            "models/GMM/gmm_peg_v2_pose_10.mat",
+            "models/GMM/gmm_peg_v2_pose_11.mat",
+            "models/GMM/gmm_peg_v2_pose_12.mat",
+            "models/GMM/gmm_peg_v2_pose_13.mat",
+            "models/GMM/gmm_peg_v2_pose_14.mat"]
+
+optimized_gmm_name: ""
+
+bohb:
+  min_budget: 1
+  max_budget: 20
+  n_iterations: 20
+  run_id: 'peg_gmm'
+  nameserver: '127.0.0.1'
+
+worker:
+  gmm_name: ""
+  env:
+    show_gui: False
+    with_force: False
+    with_joint: False
+    relative: True
+    with_noise: True
+    reward_type: "shaped"
+    dt: 0.05
+  validation:
+    max_steps: 600
+    render: False

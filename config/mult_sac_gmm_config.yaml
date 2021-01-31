@@ -1,0 +1,55 @@
+gmm_names:
+- models/GMM/gmm_peg_v2_pose_5.mat
+- models/GMM/gmm_peg_v2_pose_6.mat
+- models/GMM/gmm_peg_v2_pose_7.mat
+- models/GMM/gmm_peg_v2_pose_8.mat
+- models/GMM/gmm_peg_v2_pose_9.mat
+- models/GMM/gmm_peg_v2_pose_10.mat
+- models/GMM/gmm_peg_v2_pose_11.mat
+- models/GMM/gmm_peg_v2_pose_12.mat
+- models/GMM/gmm_peg_v2_pose_13.mat
+- models/GMM/gmm_peg_v2_pose_14.mat
+
+train:
+  env:
+    show_gui: false
+    with_force: &force true
+    with_joint: &joint false
+    relative: &relative true
+    with_noise: &noise true
+    reward_type: &reward shaped
+    dt: &dt 0.05
+  run:
+    num_episodes: 500
+    max_steps: &steps 500
+    log: true
+    eval_every: 10
+    eval_episodes: 20
+    render: false
+    save_dir: models/
+    save_every: 10
+    early_stopping: true
+test:
+  env:
+    show_gui: true
+    with_force: *force
+    with_joint: *joint
+    relative: *relative
+    with_noise: *noise
+    reward_type: *reward
+    dt: *dt
+  run:
+    max_steps: *steps
+    num_episodes: 5
+    render: false
+
+sac_agent:
+  batch_size: 256
+  gamma: 0.99
+  tau: 0.005
+  actor_lr: 0.0003
+  critic_lr: 0.0003
+  alpha_lr: 0.0003
+  hidden_dim: 256
+  window_size: 32
+

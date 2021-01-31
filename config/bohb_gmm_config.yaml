@@ -15,7 +15,7 @@ worker:
     with_joint: False
     relative: True
     with_noise: False
-    sparse: False
+    reward_type: "shaped"
     dt: 0.05
   validation:
     max_steps: 600
