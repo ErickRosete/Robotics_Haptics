@@ -1,37 +1,37 @@
-gmm_name: "models/GMM/gmm_peg_v2_pose_3.mat"
+gmm_name: "gmm_peg_v2_pose_5.mat"
 
 train:
+  num_random_seeds: 5
   env:
     show_gui: False
-    with_force: True
-    with_joint: False
-    relative: True
-    with_noise: True
-    sparse: False
-    dt: 0.05
+    with_force: &force False
+    with_joint: &joint False
+    relative: &relative True
+    with_noise: &noise False
+    reward_type: &reward "shaped_2"
+    dt: &dt 0.01
   run:
     num_episodes: 1000
-    max_steps: 500
+    max_steps: &steps 500
     log: True
     eval_every: 10
     eval_episodes: 10
     render: False
     save_dir: "models/"
-    save_filename: "peg"
     save_every: 10
-    early_stopping: True
+    early_stopping: False
 
 test:
   env:
     show_gui: True
-    with_force: False
-    with_joint: False
-    relative: True
-    with_noise: False
-    sparse: False
-    dt: 0.05
+    with_force: *force
+    with_joint: *joint
+    relative: *relative
+    with_noise: *noise
+    reward_type: *reward
+    dt: *dt
   run:
-    max_steps: 500
+    max_steps: *steps
     num_episodes: 5
     render: False
 

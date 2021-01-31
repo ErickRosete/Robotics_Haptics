@@ -39,7 +39,8 @@ class SAC_GMM_Agent:
 
         #Log 
         self.logger = logging.getLogger(__name__)
-        self.writer = SummaryWriter()
+        comment = "_SAC_GMM_%d" % (model.mu.shape[0]//2)
+        self.writer = SummaryWriter(comment=comment)
 
         #Hyperparameters
         self.batch_size = batch_size
@@ -237,15 +238,15 @@ class SAC_GMM_Agent:
             # Save model
             if episode % save_every == 0 or episode == num_episodes:
                 sac_dir = save_dir + "/SAC_GMM_models"
-                gmm_dir = save_dir + "/GMM_models"
                 if not os.path.exists(sac_dir):
-                    os.makedirs(sac_dir)          
-                if not os.path.exists(gmm_dir):
-                    os.makedirs(gmm_dir) 
+                    os.makedirs(sac_dir)     
                 filename = "%s/%s_%d.pth"%(sac_dir, save_filename, episode)
-                self.save(filename)
-                filename = "%s/%s_%d.npy"%(gmm_dir, save_filename, episode)
-                self.model.save_model(filename)
+                self.save(filename)    
+                # gmm_dir = save_dir + "/GMM_models"
+                # if not os.path.exists(gmm_dir):
+                #     os.makedirs(gmm_dir) 
+                # filename = "%s/%s_%d.npy"%(gmm_dir, save_filename, episode)
+                # self.model.save_model(filename)
 
 
         return episode, episodes_returns, episodes_lengths
