@@ -7,9 +7,9 @@
 
     <link concave="yes" name="board">
         <inertial>
-            <origin xyz="-0.00037 0.0 0.06664" rpy="0 0 0"/>
-            <mass value="1.96842 "/>
-            <inertia ixx="0.02070"  ixy="0"  ixz="-0.00003" iyy="0.064  " iyz="0" izz="0.06874" />
+            <origin xyz="-0.00026 0.0 0.11809" rpy="0 0 0"/>
+            <mass value="3.70082"/>
+            <inertia ixx="0.03619"  ixy="0"  ixz="-0.00007" iyy="0.11598  " iyz="0" izz="0.12277" />
         </inertial>
 
         <visual>
@@ -31,7 +31,7 @@
     <joint name="board__circle" type="fixed">
         <parent link="board"/>
         <child link="circle"/>
-        <origin xyz="-0.15 0.0 0.195" rpy="0 0 0" />
+        <origin xyz="-0.15 0.0 0.190" rpy="0 0 0" />
     </joint>
     
     <link name="circle" >
@@ -45,7 +45,7 @@
     <joint name="board__hexagon" type="fixed">
         <parent link="board"/>
         <child link="hexagon"/>
-        <origin xyz="0.0 0.0 0.195" rpy="0 0 0" />
+        <origin xyz="0.0 0.0 0.190" rpy="0 0 0" />
     </joint>
 
     <link name="hexagon" >
@@ -59,7 +59,7 @@
     <joint name="board__square" type="fixed">
         <parent link="board"/>
         <child link="square"/>
-        <origin xyz="0.15 0.0 0.195" rpy="0 0 0" />
+        <origin xyz="0.15 0.0 0.190" rpy="0 0 0" />
     </joint>
 
     <link name="square" >

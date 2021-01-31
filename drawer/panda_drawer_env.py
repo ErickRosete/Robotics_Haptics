@@ -61,7 +61,7 @@ class PandaDrawerEnv(gym.Env):
 
 
         # Force measurements
-        force = (self.getForce(9), self.getForce(10)) 
+        force = (self.get_force(9), self.get_force(10)) 
 
         # Reward calculation
         if state_object[0] <= 0.30: # Coord 'x' of object
@@ -75,7 +75,7 @@ class PandaDrawerEnv(gym.Env):
         observation = np.asarray(state_robot + state_fingers + force)
         return observation, reward, done, info
 
-    def getForce(self, linkIndex):
+    def get_force(self, linkIndex):
         contact_points = p.getContactPoints(bodyA=self.pandaUid, linkIndexA=linkIndex) 
         
         max_force, force = 1, 0
@@ -87,7 +87,7 @@ class PandaDrawerEnv(gym.Env):
             force /= max_force
         return force
 
-    def getDepth(self, linkIndex):
+    def get_depth(self, linkIndex):
         if linkIndex != 9 and linkIndex !=10:
             return
 
@@ -160,7 +160,7 @@ class PandaDrawerEnv(gym.Env):
         state_robot = p.getLinkState(self.pandaUid, 11, computeForwardKinematics=1)[0]
         print(state_robot)
         state_fingers = (p.getJointState(self.pandaUid,9)[0], p.getJointState(self.pandaUid, 10)[0])
-        force = (self.getForce(9), self.getForce(10)) 
+        force = (self.get_force(9), self.get_force(10)) 
         observation = np.asarray(state_robot + state_fingers + force)
         
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING,1) # rendering's back on again
